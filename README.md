@@ -86,3 +86,4 @@ When contributing to this project:
 3. Follow React best practices
 4. Generate tests for all new features
 5. Let GitHub Copilot assist with implementation details
+
