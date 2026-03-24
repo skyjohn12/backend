@@ -1,0 +1,7 @@
+{
+    "customer_name":"Guila Meira Lins",
+    "custommer_id":"CUST_666",
+    "items":[
+        {"name":"Book","quantity":1,"price":10}
+    ],
+    "total_amount":10}

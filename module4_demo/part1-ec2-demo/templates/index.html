@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Demo - Elastic Beanstalk + S3</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FF9900 0%, #232F3E 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 { color: #232F3E; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 18px; margin-bottom: 20px; }
+        .services { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .service-badge {
+            background: #FF9900;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .card h2 { color: #232F3E; margin-bottom: 15px; }
+        button {
+            background: #232F3E;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover { background: #37475A; transform: translateY(-2px); }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover { border-color: #FF9900; background: #fff7ed; }
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .file-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .file-item {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-item a { color: #FF9900; text-decoration: none; font-weight: bold; }
+        .file-item a:hover { text-decoration: underline; }
+        .flash-message {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .flash-error { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Cloud Services Demo</h1>
+            <p class="subtitle">Elastic Beanstalk + S3</p>
+            <div class="services">
+                <span class="service-badge">🖥️ Elastic Beanstalk</span>
+                <span class="service-badge">🗄️ Amazon S3</span>
+            </div>
+        </div>
+        <div class="card">
+            <h2>📊 Instance Information</h2>
+            <div id="info">Loading...</div>
+            <button onclick="loadInfo()">🔄 Refresh Instance Info</button>
+        </div>
+
+        <div class="card">
+            <h2>📤 Upload File to S3</h2>
+            <div class="upload-area">
+                <p style="font-size: 48px; margin-bottom: 10px;">☁️</p>
+                <p style="color: #666; margin-bottom: 15px;">Upload files to Amazon S3</p>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.gif,.pdf,.txt" required>
+                    <button type="submit" style="background: #FF9900;">⬆️ Upload to S3</button>
+                </form>
+                <p style="margin-top: 15px; font-size: 12px; color: #999;">
+                    Allowed: PNG, JPG, GIF, PDF, TXT (Max 16MB)
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📁 Uploaded Files (from S3)</h2>
+            <div id="files">Loading files...</div>
+            <button onclick="loadInfo()">🔄 Refresh File List</button>
+        </div>
+    </div>
+    <script>
+        function loadInfo() {
+            fetch('/api/info')
+                .then(r => r.json())
+                .then(d => {
+                    // Update instance info
+                    document.getElementById('info').innerHTML = 
+                        '<p><strong>Hostname:</strong> ' + d.hostname + '</p>' +
+                        '<p><strong>IP Address:</strong> ' + d.local_ip + '</p>' +
+                        '<p><strong>S3 Bucket:</strong> ' + d.aws_services.s3_bucket + '</p>' +
+                        '<p><strong>Timestamp:</strong> ' + new Date(d.timestamp).toLocaleString() + '</p>';
+                    
+                    // Update file list
+                    let filesHtml = '';
+                    if (d.uploaded_files && d.uploaded_files.length > 0) {
+                        filesHtml = '<div class="file-list">';
+                        d.uploaded_files.forEach(file => {
+                            const fileSize = (file.size / 1024).toFixed(2) + ' KB';
+                            const fileName = file.name;
+                            filesHtml += `
+                                <div class="file-item">
+                                    <div>
+                                        <strong>${fileName}</strong><br>
+                                        <small style="color: #666;">${fileSize} • ${new Date(file.last_modified).toLocaleString()}</small>
+                                    </div>
+                                    <a href="${file.url}" target="_blank">🔗 View</a>
+                                </div>
+                            `;
+                        });
+                        filesHtml += '</div>';
+                    } else {
+                        filesHtml = '<p style="color: #666; text-align: center; padding: 20px;">No files uploaded yet. Try uploading one above! 👆</p>';
+                    }
+                    document.getElementById('files').innerHTML = filesHtml;
+                })
+                .catch(e => {
+                    console.error('Error loading info:', e);
+                    document.getElementById('info').innerHTML = '<p style="color: red;">Error loading information</p>';
+                });
+        }
+        loadInfo();
+    </script>
+</body>
+</html>

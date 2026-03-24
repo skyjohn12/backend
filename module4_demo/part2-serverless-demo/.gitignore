@@ -1,0 +1,21 @@
+# Lambda deployment artifacts
+lambda-functions/*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# AWS - temporary test files
+response.json
+test-response.json
+order-payload.json
+*-response.json
+
+# OS
+.DS_Store
+
+# Logs
+*.log

@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.webassets-cache
+
+# Elastic Beanstalk
+.elasticbeanstalk/
+.ebextensions/
+
+# AWS
+*.pem
+.aws/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Submission files (students will create these)
+screenshot-*.png
+*.zip
+
+# Test files
+output.json
+test-event.json
